@@ -1,119 +1,85 @@
 "use client";
-import Image from "next/image";
 import { getQuote } from "@/quote";
 import { USDC, ETH } from "@/tokens";
 import { BigNumber } from "ethers";
+import React, { useState } from 'react';
 
 const FROM_TOKEN = USDC;
-const FROM_AMOUNT = BigNumber.from("1000000");
+// const FROM_AMOUNT = BigNumber.from("1000000");
 const TO_TOKEN = ETH;
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+// Styling // 
+const containerClass = "flex min-h-screen flex-col items-center justify-between p-24"
+const cardClass = "block text-gray-700 font-semibold mb-1"
+const textClass = "mt-1 text-gray-500 text-lg"
+const title = "text-black text-2xl font-bold mb-4"
 
-      <div className="relative flex place-items-center">
+const boxStyle = {
+  backgroundColor: '#a9a9a9', // Light grey background color
+  padding: '1rem', // Adjust padding as needed
+  borderRadius: '0.25rem', // Rounded corners
+  marginBottom: '1rem', // Spacing at the bottom
+};
+
+// React State Variables // 
+export default function Home() {
+
+  const [swapBalance, setSwapBalance] = useState(BigNumber.from("0"))
+  const [slippagePercent, setSlippagePercentage] = useState(0);
+  const [fromAmount, setFromAmount] = useState(BigNumber.from("1000000"));
+
+  const getQuoteHandler = async () => {
+    try {
+      const quote = await getQuote(FROM_TOKEN, TO_TOKEN, fromAmount);
+      setSwapBalance(quote.swapBalance);
+      setSlippagePercentage(quote.slippagePercent);
+
+    } catch (error) {
+      console.error("Error while fetching quote:", error);
+    }
+  };
+  
+  return (
+    <main className={containerClass}>
+
+        <div className="p-6 bg-white shadow-md rounded-lg">
+          
+        <div className={title}>
+          {/* <img src="./public/rainmakerdefi_logo.jpeg" alt="Logo" className="logo" /> */}
+          <h1 className="title">Token Swap/Slippage Estimator</h1>
+        </div>
+
+        <div className="mb-4">
+          <label className={cardClass}>From Token:</label>
+          <p className={textClass}>{FROM_TOKEN.symbol}</p>
+
+          <label className={cardClass}>To Token:</label>
+          <p className={textClass}>{TO_TOKEN.symbol}</p>
+
+          <label className={cardClass}>From Amount:</label>
+          <input
+            className={textClass}
+            type="number"
+            value={fromAmount.toString()}
+            onChange={(e) => setFromAmount(BigNumber.from(e.target.value))}
+          />
+        </div>
+
         <button
-          onClick={() => getQuote(FROM_TOKEN, TO_TOKEN, FROM_AMOUNT)}
-          className="text-black-600 bg-slate-50 p-4 rounded-lg"
+          onClick={getQuoteHandler}
+          title = "Click to get a quote"
+          className="text-white bg-purple-700 hover:bg-purple-500 p-2 rounded-md mb-4"
         >
           Get Quote
         </button>
+
+        <div style={boxStyle}>
+          <p className={cardClass}>{`Swap Balance: ${swapBalance} ${TO_TOKEN.symbol}`}</p>
+          <p className={cardClass}>{`Slippage: ${slippagePercent.toFixed(3)}%`}</p>
+        </div>
+
       </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
     </main>
   );
 }
